@@ -34,12 +34,14 @@ class Usuario {
   String nombre;
   String apellido;
   String rol;
+  String? email; 
 
   Usuario({
     required this.id,
     required this.nombre,
     required this.apellido,
     required this.rol,
+    this.email,
   });
 
   factory Usuario.fromJson(Map<String, dynamic> json) => Usuario(
@@ -47,6 +49,7 @@ class Usuario {
     nombre: json["nombre"],
     apellido: json["apellido"],
     rol: json["rol"],
+    email: json["email"], // <- parsear email si viene
   );
 
   Map<String, dynamic> toJson() => {
@@ -54,5 +57,6 @@ class Usuario {
     "nombre": nombre,
     "apellido": apellido,
     "rol": rol,
+    "email": email, 
   };
 }

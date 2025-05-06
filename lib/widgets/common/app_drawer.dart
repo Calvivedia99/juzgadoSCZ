@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:si2/providers/auth_provider.dart';
+import 'package:si2/screens/expediente/index.dart';
 
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});

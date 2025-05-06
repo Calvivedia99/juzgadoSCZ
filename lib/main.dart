@@ -15,6 +15,9 @@ import 'package:si2/screens/home/home_screen.dart';
 import 'package:si2/screens/notificaciones/notifcaciones_screen.dart';
 import 'package:si2/screens/notificaciones/notificaciones_create_screen.dart';
 import 'package:si2/screens/perfil/perfil_screen.dart';
+import 'package:si2/screens/expediente/index.dart';
+import 'package:si2/screens/expediente/create.dart';
+import 'package:si2/screens/expediente/edit.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized(); // Aseguramos inicialización
@@ -98,6 +101,11 @@ class MyApp extends StatelessWidget {
         '/notificaciones/crear':
             (context) =>
                 const NotificacionesCreateScreen(), // Descomenta cuando esté listo
+
+
+        '/expedientes': (context) => ExpedienteIndexScreen(),
+        '/expedientes/crear': (context) => ExpedienteCreateScreen(),
+        '/expedientes/editar': (context) => ExpedienteEditScreen(),
       },
     );
   }

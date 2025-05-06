@@ -1,111 +1,66 @@
-import 'package:flutter/material.dart';
-import 'package:si2/models/user_model.dart';
-
 class Expediente {
-  final int? id;
-  final String numero;
-  final String titulo;
-  final String descripcion;
-  final String estado; // "Abierto", "En resolución", "Cerrado"
-  final String tipo;
-  final DateTime fechaApertura;
-  final DateTime? fechaCierre;
-  final int? clienteId;
-  final int? abogadoId;
-  final int? juezId;
-  final int? asistenteId;
+  final int? numeroExpediente;
+  final String contenido;
 
-  // Relaciones
-  final User? cliente;
-  final User? abogado;
-  final User? juez;
-  final User? asistente;
-  final List<String>? etiquetas;
+  final String demandanteCarnet;
+  final String demandanteNombre;
+  final String demandanteApellido;
+
+  final String demandadoCarnet;
+  final String demandadoNombre;
+  final String demandadoApellido;
+
+  final String abogadoDemandanteCarnet;
+  final String abogadoDemandanteNombre;
+  final String abogadoDemandanteApellido;
+
+  final String abogadoDemandadoCarnet;
+  final String abogadoDemandadoNombre;
+  final String abogadoDemandadoApellido;
+
+  final String juezCarnet;
+  final String juezNombre;
+  final String juezApellido;
 
   Expediente({
-    this.id,
-    required this.numero,
-    required this.titulo,
-    required this.descripcion,
-    required this.estado,
-    required this.tipo,
-    required this.fechaApertura,
-    this.fechaCierre,
-    this.clienteId,
-    this.abogadoId,
-    this.juezId,
-    this.asistenteId,
-    this.cliente,
-    this.abogado,
-    this.juez,
-    this.asistente,
-    this.etiquetas,
+    this.numeroExpediente,
+    required this.contenido,
+    required this.demandanteCarnet,
+    required this.demandanteNombre,
+    required this.demandanteApellido,
+    required this.demandadoCarnet,
+    required this.demandadoNombre,
+    required this.demandadoApellido,
+    required this.abogadoDemandanteCarnet,
+    required this.abogadoDemandanteNombre,
+    required this.abogadoDemandanteApellido,
+    required this.abogadoDemandadoCarnet,
+    required this.abogadoDemandadoNombre,
+    required this.abogadoDemandadoApellido,
+    required this.juezCarnet,
+    required this.juezNombre,
+    required this.juezApellido,
   });
 
   factory Expediente.fromJson(Map<String, dynamic> json) {
     return Expediente(
-      id: json['id'],
-      numero: json['numero'],
-      titulo: json['titulo'],
-      descripcion: json['descripcion'],
-      estado: json['estado'],
-      tipo: json['tipo'],
-      fechaApertura: DateTime.parse(json['fechaApertura']),
-      fechaCierre:
-          json['fechaCierre'] != null
-              ? DateTime.parse(json['fechaCierre'])
-              : null,
-      clienteId: json['clienteId'],
-      abogadoId: json['abogadoId'],
-      juezId: json['juezId'],
-      asistenteId: json['asistenteId'],
-      cliente: json['cliente'] != null ? User.fromJson(json['cliente']) : null,
-      abogado: json['abogado'] != null ? User.fromJson(json['abogado']) : null,
-      juez: json['juez'] != null ? User.fromJson(json['juez']) : null,
-      asistente:
-          json['asistente'] != null ? User.fromJson(json['asistente']) : null,
-      etiquetas:
-          json['etiquetas'] != null
-              ? List<String>.from(json['etiquetas'])
-              : null,
+      numeroExpediente: json['numero_expediente'],
+      contenido: json['contenido'],
+      demandanteCarnet: json['demandante_carnet'],
+      demandanteNombre: json['demandante_nombre'],
+      demandanteApellido: json['demandante_apellido'],
+      demandadoCarnet: json['demandado_carnet'],
+      demandadoNombre: json['demandado_nombre'],
+      demandadoApellido: json['demandado_apellido'],
+      abogadoDemandanteCarnet: json['abogado_demandante_carnet'],
+      abogadoDemandanteNombre: json['abogado_demandante_nombre'],
+      abogadoDemandanteApellido: json['abogado_demandante_apellido'],
+      abogadoDemandadoCarnet: json['abogado_demandado_carnet'],
+      abogadoDemandadoNombre: json['abogado_demandado_nombre'],
+      abogadoDemandadoApellido: json['abogado_demandado_apellido'],
+      juezCarnet: json['juez_carnet'],
+      juezNombre: json['juez_nombre'],
+      juezApellido: json['juez_apellido'],
     );
   }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'numero': numero,
-      'titulo': titulo,
-      'descripcion': descripcion,
-      'estado': estado,
-      'tipo': tipo,
-      'fechaApertura': fechaApertura.toIso8601String(),
-      'fechaCierre': fechaCierre?.toIso8601String(),
-      'clienteId': clienteId,
-      'abogadoId': abogadoId,
-      'juezId': juezId,
-      'asistenteId': asistenteId,
-      'etiquetas': etiquetas,
-    };
-  }
-
-  // Para obtener un color según el estado
-  Color getColorPorEstado() {
-    switch (estado) {
-      case 'Abierto':
-        return Colors.green;
-      case 'En resolución':
-        return Colors.orange;
-      case 'Cerrado':
-        return Colors.red;
-      default:
-        return Colors.grey;
-    }
-  }
-
-  // Para verificar si el expediente está en progreso
-  bool get estaEnProceso => estado == 'En resolución';
-
-  // Para verificar si el expediente está cerrado
-  bool get estaCerrado => estado == 'Cerrado';
 }

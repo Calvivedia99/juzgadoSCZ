@@ -3,116 +3,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:si2/models/expediente_model.dart';
-import 'package:si2/models/user_model.dart';
 
 class ExpedienteService {
   final String baseUrl =
-      'https://juzgado-backend-production.up.railway.app/api';
+      'http://172.20.171.43:3001/api'; // Ajusta IP a tu red local
   final storage = const FlutterSecureStorage();
 
-  // ==================== MÉTODOS DE EXPEDIENTE ====================
-
-  List<Expediente> _getDatosDePrueba() {
-    final now = DateTime.now();
-
-    return [
-      Expediente(
-        id: 1,
-        numero: 'EXP-2025-001',
-        titulo: 'Caso de Divorcio',
-        descripcion: 'Proceso de divorcio por mutuo acuerdo entre las partes',
-        fechaApertura: now.subtract(Duration(days: 30)),
-        estado: 'Abierto',
-        tipo: 'Civil',
-        cliente: User(
-          id: 101,
-          nombre: 'Juan',
-          apellido: 'Pérez',
-          email: 'juan.perez@example.com',
-          rol: 'Cliente',
-        ),
-        juez: User(
-          id: 102,
-          nombre: 'María',
-          apellido: 'Gómez',
-          email: 'maria.gomez@example.com',
-          rol: 'Juez',
-        ),
-        abogado: User(
-          id: 103,
-          nombre: 'Carlos',
-          apellido: 'Rodríguez',
-          email: 'carlos.rodriguez@example.com',
-          rol: 'Abogado',
-        ),
-      ),
-      Expediente(
-        id: 2,
-        numero: 'EXP-2025-002',
-        titulo: 'Demanda Laboral',
-        descripcion:
-            'Demanda por despido injustificado y cobro de prestaciones',
-        fechaApertura: now.subtract(Duration(days: 60)),
-        estado: 'En resolución',
-        tipo: 'Laboral',
-        cliente: User(
-          id: 104,
-          nombre: 'Ana',
-          apellido: 'Martínez',
-          email: 'ana.martinez@example.com',
-          rol: 'Cliente',
-        ),
-        juez: User(
-          id: 105,
-          nombre: 'Roberto',
-          apellido: 'Díaz',
-          email: 'roberto.diaz@example.com',
-          rol: 'Juez',
-        ),
-        abogado: User(
-          id: 103,
-          nombre: 'Carlos',
-          apellido: 'Rodríguez',
-          email: 'carlos.rodriguez@example.com',
-          rol: 'Abogado',
-        ),
-      ),
-      Expediente(
-        id: 3,
-        numero: 'EXP-2025-003',
-        titulo: 'Sucesión Testamentaria',
-        descripcion: 'Trámite de sucesión testamentaria de bienes inmuebles',
-        fechaApertura: now.subtract(Duration(days: 90)),
-        estado: 'Cerrado',
-        fechaCierre: now.subtract(Duration(days: 10)),
-        tipo: 'Civil',
-        cliente: User(
-          id: 106,
-          nombre: 'Laura',
-          apellido: 'Sánchez',
-          email: 'laura.sanchez@example.com',
-          rol: 'Cliente',
-        ),
-        juez: User(
-          id: 102,
-          nombre: 'María',
-          apellido: 'Gómez',
-          email: 'maria.gomez@example.com',
-          rol: 'Juez',
-        ),
-        abogado: User(
-          id: 103,
-          nombre: 'Carlos',
-          apellido: 'Rodríguez',
-          email: 'carlos.rodriguez@example.com',
-          rol: 'Abogado',
-        ),
-      ),
-    ];
-  }
-  // Obtener un expediente por su número
-
-  // Obtener todos los expedientes (para administradores)
+  // Obtener todos los expedientes (Admin o asistente)
   Future<List<Expediente>> getExpedientes() async {
     try {
       final token = await storage.read(key: 'jwt_token');
@@ -127,279 +24,168 @@ class ExpedienteService {
         final List<dynamic> data = jsonDecode(response.body);
         return data.map((json) => Expediente.fromJson(json)).toList();
       } else {
-        // Datos de ejemplo si la API falla
-        return _getDatosDePrueba();
+        throw Exception('Error al obtener expedientes: ${response.statusCode}');
       }
     } catch (e) {
-      // Usar datos de ejemplo en caso de error
-      return _getDatosDePrueba();
+      if (kDebugMode) print('Error en getExpedientes: $e');
+      rethrow;
     }
   }
 
-  //cheeeee aqui me quedeee
-  // Obtener expedientes asignados al juez actual
-  Future<List<Map<String, dynamic>>?> obtenerExpedientesPorJuez() async {
-    try {
-      final token = await storage.read(key: 'jwt_token');
-      if (token == null) return null;
-
-      final response = await http.get(
-        Uri.parse('$baseUrl/expedientes/juez'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        final List<dynamic> data = jsonDecode(response.body);
-        return data.cast<Map<String, dynamic>>();
-      }
-      return null;
-    } catch (e) {
-      if (kDebugMode) {
-        print('Error al obtener expedientes del juez: ${e.toString()}');
-      }
-      return null;
-    }
-  }
-
-  // Obtener expedientes asignados al abogado actual
-  Future<List<Map<String, dynamic>>?> obtenerExpedientesPorAbogado() async {
-    try {
-      final token = await storage.read(key: 'jwt_token');
-      if (token == null) return null;
-
-      final response = await http.get(
-        Uri.parse('$baseUrl/expedientes/abogado'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        final List<dynamic> data = jsonDecode(response.body);
-        return data.cast<Map<String, dynamic>>();
-      }
-      return null;
-    } catch (e) {
-      if (kDebugMode) {
-        print('Error al obtener expedientes del abogado: ${e.toString()}');
-      }
-      return null;
-    }
-  }
-
-  // Método auxiliar para obtener un expediente de prueba por ID
-  Expediente _getDatosDePruebaById(int expedienteId) {
-    final expedientes = _getDatosDePrueba();
-    final expediente = expedientes.firstWhere(
-      (exp) => exp.id == expedienteId,
-      orElse: () => expedientes[0], // Devolver el primero si no encuentra
-    );
-    return expediente;
-  }
-
-  Future<Expediente> getExpedienteById(int expedienteId) async {
+  // Obtener expediente por ID
+  Future<Expediente> getExpedienteById(int id) async {
     try {
       final token = await storage.read(key: 'jwt_token');
       final response = await http.get(
-        Uri.parse('$baseUrl/expedientes/$expedienteId'),
+        Uri.parse('$baseUrl/expedientes/$id'),
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
         },
       );
-
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        return Expediente.fromJson(data);
+        return Expediente.fromJson(jsonDecode(response.body));
       } else {
-        // Si la API falla, buscar en datos de prueba
-        return _getDatosDePruebaById(expedienteId);
+        throw Exception('Error al obtener expediente: ${response.statusCode}');
       }
     } catch (e) {
-      // Usar datos de ejemplo en caso de error
-      return _getDatosDePruebaById(expedienteId);
+      if (kDebugMode) print('Error en getExpedienteById: $e');
+      rethrow;
     }
   }
 
-  // Obtener expedientes asignados al asistente actual
-  Future<List<Map<String, dynamic>>?> obtenerExpedientesPorAsistente() async {
+  // Crear expediente
+  Future<bool> crearExpediente(Map<String, dynamic> data) async {
     try {
       final token = await storage.read(key: 'jwt_token');
-      if (token == null) return null;
-
-      final response = await http.get(
-        Uri.parse('$baseUrl/expedientes/asistente'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        final List<dynamic> data = jsonDecode(response.body);
-        return data.cast<Map<String, dynamic>>();
-      }
-      return null;
-    } catch (e) {
-      if (kDebugMode) {
-        print('Error al obtener expedientes del asistente: ${e.toString()}');
-      }
-      return null;
-    }
-  }
-
-  // Obtener expedientes de un cliente
-  Future<List<Map<String, dynamic>>?> obtenerExpedientesPorCliente() async {
-    try {
-      final token = await storage.read(key: 'jwt_token');
-      if (token == null) return null;
-
-      final response = await http.get(
-        Uri.parse('$baseUrl/expedientes/cliente'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        final List<dynamic> data = jsonDecode(response.body);
-        return data.cast<Map<String, dynamic>>();
-      }
-      return null;
-    } catch (e) {
-      if (kDebugMode) {
-        print('Error al obtener expedientes del cliente: ${e.toString()}');
-      }
-      return null;
-    }
-  }
-
-  // Crear un nuevo expediente
-  Future<bool> crearExpediente(Map<String, dynamic> expedienteData) async {
-    try {
-      final token = await storage.read(key: 'jwt_token');
-      if (token == null) return false;
-
       final response = await http.post(
         Uri.parse('$baseUrl/expedientes'),
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
         },
-        body: jsonEncode(expedienteData),
+        body: jsonEncode(data),
       );
-
-      return response.statusCode == 201 || response.statusCode == 200;
+      return response.statusCode == 201;
     } catch (e) {
-      if (kDebugMode) {
-        print('Error al crear expediente: ${e.toString()}');
-      }
+      if (kDebugMode) print('Error en crearExpediente: $e');
       return false;
     }
   }
 
-  // Actualizar un expediente existente
-  Future<bool> actualizarExpediente(
-    int id,
-    Map<String, dynamic> expedienteData,
-  ) async {
+  // Actualizar expediente
+  Future<bool> actualizarExpediente(int id, Map<String, dynamic> data) async {
     try {
       final token = await storage.read(key: 'jwt_token');
-      if (token == null) return false;
-
       final response = await http.put(
         Uri.parse('$baseUrl/expedientes/$id'),
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
         },
-        body: jsonEncode(expedienteData),
+        body: jsonEncode(data),
       );
-
       return response.statusCode == 200;
     } catch (e) {
-      if (kDebugMode) {
-        print('Error al actualizar expediente: ${e.toString()}');
-      }
+      if (kDebugMode) print('Error en actualizarExpediente: $e');
       return false;
     }
   }
 
-  // Cambiar el estado de un expediente
-  Future<bool> cambiarEstadoExpediente(int id, String nuevoEstado) async {
-    try {
-      final token = await storage.read(key: 'jwt_token');
-      if (token == null) return false;
-
-      final response = await http.patch(
-        Uri.parse('$baseUrl/expedientes/$id/estado'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-        body: jsonEncode({'estado': nuevoEstado}),
-      );
-
-      return response.statusCode == 200;
-    } catch (e) {
-      if (kDebugMode) {
-        print('Error al cambiar estado del expediente: ${e.toString()}');
-      }
-      return false;
-    }
-  }
-
-  // Eliminar un expediente
+  // Eliminar expediente
   Future<bool> eliminarExpediente(int id) async {
     try {
       final token = await storage.read(key: 'jwt_token');
-      if (token == null) return false;
-
       final response = await http.delete(
         Uri.parse('$baseUrl/expedientes/$id'),
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
         },
       );
-
       return response.statusCode == 200;
     } catch (e) {
-      if (kDebugMode) {
-        print('Error al eliminar expediente: ${e.toString()}');
-      }
+      if (kDebugMode) print('Error en eliminarExpediente: $e');
       return false;
     }
   }
 
-  // Obtener detalles de un expediente específico
-  Future<Map<String, dynamic>?> obtenerExpediente(int id) async {
+  // Obtener expedientes por abogado
+  Future<List<Expediente>> getExpedientesPorAbogado(String carnet) async {
     try {
       final token = await storage.read(key: 'jwt_token');
-      if (token == null) return null;
-
       final response = await http.get(
-        Uri.parse('$baseUrl/expedientes/$id'),
+        Uri.parse('$baseUrl/expedientes/abogado/$carnet'),
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
         },
       );
-
       if (response.statusCode == 200) {
-        return jsonDecode(response.body);
+        final List<dynamic> data = jsonDecode(response.body);
+        return data.map((json) => Expediente.fromJson(json)).toList();
       }
-      return null;
+      return [];
     } catch (e) {
-      if (kDebugMode) {
-        print('Error al obtener expediente: ${e.toString()}');
+      if (kDebugMode) print('Error en getExpedientesPorAbogado: $e');
+      return [];
+    }
+  }
+
+  // Obtener expedientes por juez
+  Future<List<Expediente>> getExpedientesPorJuez(String carnet) async {
+    try {
+      final token = await storage.read(key: 'jwt_token');
+      final response = await http.get(
+        Uri.parse('$baseUrl/expedientes/juez/$carnet'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+        return data.map((json) => Expediente.fromJson(json)).toList();
       }
-      return null;
+      return [];
+    } catch (e) {
+      if (kDebugMode) print('Error en getExpedientesPorJuez: $e');
+      return [];
+    }
+  }
+
+  // Obtener listas auxiliares
+  Future<List<Map<String, dynamic>>> getClientes() async {
+    return _getLista('$baseUrl/clientes');
+  }
+
+  Future<List<Map<String, dynamic>>> getAbogados() async {
+    return _getLista('$baseUrl/abogados');
+  }
+
+  Future<List<Map<String, dynamic>>> getJueces() async {
+    return _getLista('$baseUrl/jueces');
+  }
+
+  // Auxiliar para listas
+  Future<List<Map<String, dynamic>>> _getLista(String url) async {
+    try {
+      final token = await storage.read(key: 'jwt_token');
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+        return List<Map<String, dynamic>>.from(data);
+      }
+      return [];
+    } catch (e) {
+      if (kDebugMode) print('Error en _getLista: $e');
+      return [];
     }
   }
 }
